@@ -76,7 +76,9 @@ fun rumbleProject(votes: Int): Project {
             R.drawable.many,
             R.drawable.ziggy,
             R.drawable.daniel,
-            R.drawable.suzi
+            R.drawable.suzi,
+            R.drawable.ingame
+
         ),
         groupMembers = listOf(
             Student(
@@ -234,14 +236,6 @@ fun ProjectDetailScreen(project: Project, onVoteUpdated: (Int) -> Unit) {
         Button(onClick = { switchImage() }) {
             Text("Switch Image")
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "NPCs of the game",
-            fontSize = 16.sp,
-            modifier = Modifier.padding(top = 8.dp)
-        )
     }
 }
 
