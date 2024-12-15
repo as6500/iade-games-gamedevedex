@@ -24,7 +24,7 @@ class StudentController {
                     onSuccess(Student(
                         id = id,
                         name = json.obj().getString("name"),
-                        avatar = URI(json.obj().getString("avatar")),
+                        avatar = 1,
                         biography = json.obj().getString("biography"),
                         mood = json.obj().getString("mood")
                     ))

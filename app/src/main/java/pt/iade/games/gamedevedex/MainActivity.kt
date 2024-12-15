@@ -1,5 +1,7 @@
 package pt.iade.games.gamedevedex
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -26,23 +28,32 @@ import pt.iade.games.gamedevedex.models.Project
 import pt.iade.games.gamedevedex.models.Student
 import pt.iade.games.gamedevedex.ui.components.ProjectCard
 import pt.iade.games.gamedevedex.ui.theme.GamedevedexTheme
-import java.net.URI
+import pt.iade.games.gamedevedex.ui.components.projectTheRumble
 
 class MainActivity : ComponentActivity() {
+    private lateinit var sharedPreferences: SharedPreferences
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        sharedPreferences = getSharedPreferences("GamedevedexPreferences", Context.MODE_PRIVATE)
+
         setContent {
             GamedevedexTheme {
-                MainView()
+                MainView(sharedPreferences = sharedPreferences)
             }
         }
+    }
+
+    fun getStoredVotes(): Int {
+        return sharedPreferences.getInt("project_votes", 0)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainView() {
+fun MainView(sharedPreferences: SharedPreferences) {
     var student by remember { mutableStateOf<Student?>(null) }
     val studentController = StudentController()
     studentController.GetById(
@@ -51,6 +62,8 @@ fun MainView() {
             student = studentReq
         }
     )
+
+    val storedVotes = remember { mutableStateOf(sharedPreferences.getInt("project_votes", 0)) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -77,39 +90,13 @@ fun MainView() {
 
             ProjectCard(
                 modifier = Modifier.padding(vertical = 20.dp),
-                project = ProjectExample()
+                project = projectTheRumble(storedVotes.value),
+                sharedPreferences = sharedPreferences,
+                onVoteUpdated = { newVoteCount ->
+                    storedVotes.value = newVoteCount
+                    sharedPreferences.edit().putInt("project_votes", newVoteCount).apply()
+                }
             )
         }
     }
-}
-
-@Composable
-@Preview(showBackground = true)
-fun MainViewPreview() {
-    GamedevedexTheme {
-        MainView()
-    }
-}
-
-fun ProjectExample(): Project {
-    return Project(
-        title = "Among Us",
-        votes = 2,
-        description = "Super sus.",
-        id = 404,
-        semester = 1,
-        assets = listOf(
-            URI.create("https://lutris.net/media/games/screenshots/ss_649e19ff657fa518d4c2b45bed7ffdc4264a4b3a.jpg"),
-            URI.create("https://cdn.mobygames.com/screenshots/12341377-among-us-windows-calling-an-emergency-meeting.png"),
-        ),
-        groupMembers = listOf(
-            Student(
-                id = 123,
-                name = "João Pedro",
-                biography = "Love playing Valorant. Currently thinking of switching courses.",
-                mood = "Lucky",
-                avatar = URI.create("https://media.gettyimages.com/photos/cristiano-ronaldo-of-portugal-poses-during-the-official-fifa-world-picture-id450555852?k=6&m=450555852&s=612x612&w=0&h=aUh0DVio_ubpFtCVvMv3WLR1MVPQji1sN5PDNKvHCT4=")
-            )
-        )
-    )
 }

@@ -1,6 +1,7 @@
 package pt.iade.games.gamedevedex.ui.components
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -40,11 +41,13 @@ import java.net.URI
 @Composable
 fun ProjectCard(
     project: Project,
-    modifier: Modifier = Modifier
+    sharedPreferences: SharedPreferences,
+    modifier: Modifier = Modifier,
+    onVoteUpdated: (Int) -> Unit = {}
 ) {
     val context = LocalContext.current
     // var votes = project.votes
-    var votes by remember { mutableIntStateOf(project.votes) }
+    var votes by remember { mutableStateOf(sharedPreferences.getInt("project_votes_${project.id}", project.votes)) }
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -60,11 +63,12 @@ fun ProjectCard(
                 .height(200.dp)
                 .fillMaxWidth()
         ) {
-            AsyncImage(
-                model = project.assets[0].toString(),
-                placeholder = painterResource(R.drawable.placeholder_cover_image),
-                contentDescription = "Cover image of the game",
-                modifier = Modifier.fillMaxSize(),
+            Image(
+                painter = painterResource(R.drawable.therumblelogo),
+                contentDescription = "Project Image",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
                 contentScale = ContentScale.Crop
             )
 
@@ -74,7 +78,7 @@ fun ProjectCard(
                 Text(
                     text = "$votes",
                     fontSize = 17.sp,
-                    color = Color(255, 255, 255)
+                    color = Color(0, 0, 0)
                 )
             }
         }
@@ -94,65 +98,13 @@ fun ProjectCard(
             Button(
                 onClick = {
                     votes++
-                    project.votes++
+                    sharedPreferences.edit().putInt("project_votes_${project.id}", votes).apply()
+                    onVoteUpdated(votes)
                 },
                 modifier = Modifier.padding(start = 30.dp)
             ) {
                 Text("Vote")
             }
         }
-    }
-}
-
-@Composable
-@Preview()
-fun ProjectCardPreview() {
-    Column {
-        ProjectCard(
-            modifier = Modifier.padding(vertical = 20.dp),
-            project = Project(
-                title = "Among Us",
-                votes = 2,
-                description = "Super sus.",
-                id = 404,
-                semester = 1,
-                assets = listOf(
-                    URI.create("https://cdn.mobygames.com/screenshots/12341377-among-us-windows-calling-an-emergency-meeting.png"),
-                    URI.create("https://lutris.net/media/games/screenshots/ss_649e19ff657fa518d4c2b45bed7ffdc4264a4b3a.jpg")
-                ),
-                groupMembers = listOf(
-                    Student(
-                        id = 123,
-                        name = "João Pedro",
-                        biography = "Love playing Valorant. Currently thinking of switching courses.",
-                        mood = "Lucky",
-                        avatar = URI.create("https://media.gettyimages.com/photos/cristiano-ronaldo-of-portugal-poses-during-the-official-fifa-world-picture-id450555852?k=6&m=450555852&s=612x612&w=0&h=aUh0DVio_ubpFtCVvMv3WLR1MVPQji1sN5PDNKvHCT4=")
-                    )
-                )
-            )
-        )
-        ProjectCard(
-            modifier = Modifier.padding(vertical = 20.dp),
-            project = Project(
-                title = "Zelda: Twilight Princess",
-                votes = 123,
-                description = "The best Wii game ever made. Apart from Super Smash Bros.",
-                id = 404,
-                semester = 1,
-                assets = listOf(
-                    URI.create("https://cdn.mobygames.com/screenshots/12341377-among-us-windows-calling-an-emergency-meeting.png"),
-                    URI.create("https://lutris.net/media/games/screenshots/ss_649e19ff657fa518d4c2b45bed7ffdc4264a4b3a.jpg")
-                ),
-                groupMembers = listOf(
-                    Student(
-                        id = 123,
-                        name = "João Pedro",
-                        biography = "Love playing Valorant. Currently thinking of switching courses.",
-                        mood = "Lucky",
-                        avatar = URI.create("https://media.gettyimages.com/photos/cristiano-ronaldo-of-portugal-poses-during-the-official-fifa-world-picture-id450555852?k=6&m=450555852&s=612x612&w=0&h=aUh0DVio_ubpFtCVvMv3WLR1MVPQji1sN5PDNKvHCT4=")
-                    )
-                )
-            )
-        )
     }
 }
